@@ -6,25 +6,25 @@
 <title>Knockout bracket — FIFA World Cup 2026</title>
 <style>
   :root{
-    --bg:#0b0f1a;
-    --bg2:#0f1424;
-    --grid:#161d33;
-    --card:#141a2e;
-    --card-hi:#1b2440;
-    --border:#28324f;
-    --divider:#222b45;
-    --text:#e8ecf6;
-    --muted:#7e879e;
-    --head:#9aa4c0;
-    --ph:#525d7a;
-    --mid:#6f7ea8;
-    --line:#2a3551;
+    --bg:#f4f6fb;
+    --bg2:#eef1f8;
+    --grid:#e7eaf2;
+    --card:#ffffff;
+    --card-hi:#f2f5fc;
+    --border:#dde2ee;
+    --divider:#eceff6;
+    --text:#1c2336;
+    --muted:#7a8298;
+    --head:#566079;
+    --ph:#aab1c4;
+    --mid:#8a93ad;
+    --line:#cdd4e4;
     --line-live:#3c5cff;
-    --gold:#ffd86b;
-    --gold-bd:#ffb627;
-    --gold-glow:rgba(255,182,39,.35);
-    --accent:#3c5cff;
-    --accent-soft:rgba(60,92,255,.16);
+    --gold:#f2b417;
+    --gold-bd:#d99405;
+    --gold-glow:rgba(217,148,5,.28);
+    --accent:#2f4dff;
+    --accent-soft:rgba(47,77,255,.12);
     --win:#1c7d52;
     --champ1:#ffe08a;
     --champ2:#ff9e2c;
@@ -33,8 +33,8 @@
   html,body{margin:0;padding:0;}
   body{
     background:
-      radial-gradient(1200px 600px at 20% -10%, #16204a 0%, transparent 55%),
-      radial-gradient(1000px 500px at 90% 10%, #2a1640 0%, transparent 50%),
+      radial-gradient(1200px 600px at 18% -10%, #e3ebff 0%, transparent 55%),
+      radial-gradient(1000px 520px at 92% 8%, #fdeecb 0%, transparent 52%),
       var(--bg);
     color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -43,24 +43,24 @@
   }
   .page{padding:26px 28px 48px; max-width:1240px; margin:0 auto;}
 
-  .topbar{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px;}
+  .topbar{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px;}
   .title{
-    font-size:30px;font-weight:800;letter-spacing:-.5px;margin:0;
-    background:linear-gradient(92deg,#fff 0%,#cfd7f5 45%,var(--gold) 100%);
+    font-size:34px;font-weight:800;letter-spacing:-.5px;margin:0;
+    background:linear-gradient(92deg,#1c2336 0%,#3a4d91 50%,var(--gold-bd) 100%);
     -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   }
-  .subtitle{font-size:13px;color:var(--muted);margin:6px 0 0;max-width:560px;line-height:1.5;}
+  .subtitle{font-size:14px;color:var(--muted);margin:7px 0 0;max-width:580px;line-height:1.55;}
 
-  .progress-wrap{min-width:230px;}
-  .progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--head);margin-bottom:6px;font-weight:600;}
-  .progress-track{height:8px;border-radius:99px;background:var(--grid);overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.4);}
+  .progress-wrap{min-width:240px;}
+  .progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--head);margin-bottom:6px;font-weight:600;}
+  .progress-track{height:9px;border-radius:99px;background:var(--grid);overflow:hidden;box-shadow:inset 0 1px 2px rgba(20,30,60,.12);}
   .progress-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width .5s cubic-bezier(.4,0,.2,1);}
 
   .scroller{overflow-x:auto;overflow-y:hidden;padding-bottom:10px;}
   .scroller::-webkit-scrollbar{height:10px;}
   .scroller::-webkit-scrollbar-track{background:var(--grid);border-radius:99px;}
-  .scroller::-webkit-scrollbar-thumb{background:#2c3756;border-radius:99px;}
-  .scroller::-webkit-scrollbar-thumb:hover{background:#3a4870;}
+  .scroller::-webkit-scrollbar-thumb{background:#c2cadb;border-radius:99px;}
+  .scroller::-webkit-scrollbar-thumb:hover{background:#aab4cb;}
   .bracket{position:relative;width:1130px;height:800px;}
 
   .connectors{position:absolute;left:0;top:0;z-index:1;pointer-events:none;}
@@ -69,7 +69,7 @@
 
   .colhead{
     position:absolute;z-index:2;text-align:center;
-    font-size:10.5px;color:var(--head);font-weight:700;letter-spacing:.6px;
+    font-size:11.5px;color:var(--head);font-weight:700;letter-spacing:.6px;
     text-transform:uppercase;white-space:nowrap;
   }
   .colhead .ch-dot{display:inline-block;width:5px;height:5px;border-radius:99px;background:var(--accent);margin-right:5px;vertical-align:middle;opacity:.8;}
@@ -77,38 +77,38 @@
   .match{
     position:absolute;z-index:3;background:var(--card);
     border:1px solid var(--border);border-radius:7px;overflow:hidden;
-    box-shadow:0 2px 8px rgba(0,0,0,.28);
+    box-shadow:0 1px 4px rgba(28,42,90,.07);
     transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   }
-  .match:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.4);border-color:#36456e;}
-  .match.complete{border-color:#33507e;}
+  .match:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(28,42,90,.14);border-color:#c2cbe0;}
+  .match.complete{border-color:#b9c5e6;}
   .date{
-    position:absolute;z-index:2;font-size:8.5px;color:var(--muted);
+    position:absolute;z-index:2;font-size:9.5px;color:var(--muted);
     white-space:nowrap;letter-spacing:.2px;font-variant-numeric:tabular-nums;
   }
   .mid{
-    position:absolute;z-index:4;font-size:9px;color:var(--mid);
-    white-space:nowrap;cursor:default;font-weight:600;letter-spacing:.4px;opacity:.7;
+    position:absolute;z-index:4;font-size:10px;color:var(--mid);
+    white-space:nowrap;cursor:default;font-weight:600;letter-spacing:.4px;opacity:.8;
   }
 
   .slot{
     position:relative;display:flex;align-items:center;
-    height:27px;padding:0 8px;font-size:11.5px;font-weight:600;
+    height:29px;padding:0 8px;font-size:12.5px;font-weight:600;
     color:var(--text);user-select:none;transition:background .15s;
   }
   .slot + .slot{border-top:1px solid var(--divider);}
   .slot.resolved{cursor:pointer;}
   .slot.resolved:hover{background:var(--card-hi);}
   .slot .flag{
-    width:19px;height:13px;margin-right:7px;border-radius:2px;
-    object-fit:cover;flex:0 0 auto;box-shadow:0 0 0 .5px rgba(255,255,255,.12);
+    width:20px;height:14px;margin-right:7px;border-radius:2px;
+    object-fit:cover;flex:0 0 auto;box-shadow:0 0 0 .5px rgba(20,30,60,.14);
   }
   .slot .code{letter-spacing:.4px;}
-  .slot .ph{color:var(--ph);font-weight:500;letter-spacing:.4px;font-size:10.5px;}
+  .slot .ph{color:var(--ph);font-weight:500;letter-spacing:.4px;font-size:11.5px;}
 
-  .slot.is-loser{opacity:.34;}
-  .slot.is-winner{background:linear-gradient(90deg,rgba(28,125,82,.20),transparent 70%);}
-  .slot.is-winner .code{font-weight:800;color:#fff;}
+  .slot.is-loser{opacity:.4;}
+  .slot.is-winner{background:linear-gradient(90deg,rgba(28,125,82,.14),transparent 70%);}
+  .slot.is-winner .code{font-weight:800;color:#14633e;}
   .slot.is-winner::after{
     content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
     background:linear-gradient(180deg,var(--gold),var(--gold-bd));
@@ -119,7 +119,15 @@
   }
   .slot.is-champion .code{font-weight:900;color:#3a2400;}
   .slot.is-champion .ph{color:#5a3a00;}
-  .trophy-inline{margin-left:auto;width:15px;height:15px;flex:0 0 auto;}
+  /* bronze winner of the 3rd-place play-off */
+  .slot.is-bronze{background:linear-gradient(100deg,#f3d9b0,#e6b877);color:#4a3208;}
+  .slot.is-bronze .code{font-weight:800;color:#4a3208;}
+  .slot.is-bronze::after{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:linear-gradient(180deg,#d9a85a,#b07d2e);
+  }
+  .trophy-inline{margin-left:auto;width:16px;height:16px;flex:0 0 auto;}
+  .medal-inline{margin-left:auto;font-size:13px;flex:0 0 auto;}
 
   @keyframes pop{0%{transform:scale(.86);opacity:0;}60%{transform:scale(1.06);}100%{transform:scale(1);opacity:1;}}
   .slot.just-set .flag,.slot.just-set .code{animation:pop .32s cubic-bezier(.34,1.56,.64,1);}
@@ -129,46 +137,46 @@
 
   .clr{
     margin-left:auto;border:none;background:transparent;
-    color:#56608a;font-size:14px;line-height:1;cursor:pointer;padding:0 0 0 4px;
+    color:#aab2c6;font-size:15px;line-height:1;cursor:pointer;padding:0 0 0 4px;
     opacity:0;transition:opacity .12s,color .12s;
   }
-  .slot.is-champion .clr{color:#7a5200;}
+  .slot.is-champion .clr,.slot.is-bronze .clr{color:#8a6510;}
   .slot.resolved:hover .clr{opacity:1;}
-  .clr:hover{color:#ff5b74;}
+  .clr:hover{color:#ef4b66;}
 
   .centerbox{
     position:absolute;z-index:3;background:var(--card);
     border:1px solid var(--border);border-radius:9px;
-    padding:7px 0 0;box-shadow:0 4px 16px rgba(0,0,0,.4);
+    padding:7px 0 0;box-shadow:0 4px 16px rgba(28,42,90,.12);
   }
   .centerbox.final{
     border-color:var(--gold-bd);
     box-shadow:0 0 0 1px var(--gold-bd), 0 8px 30px var(--gold-glow);
-    background:linear-gradient(180deg,#1c2238,#161c30);
+    background:linear-gradient(180deg,#fffaf0,#fff6e4);
   }
   .centerhead{
     position:absolute;z-index:4;text-align:center;font-weight:800;
-    font-size:12px;color:#fff;white-space:nowrap;letter-spacing:.3px;
+    font-size:13px;color:var(--text);white-space:nowrap;letter-spacing:.3px;
   }
-  .centerhead.small{font-size:9.5px;font-weight:700;color:var(--head);letter-spacing:.5px;text-transform:uppercase;}
+  .centerhead.small{font-size:10.5px;font-weight:700;color:var(--head);letter-spacing:.5px;text-transform:uppercase;}
   .cdate{
-    text-align:center;font-size:8.5px;color:var(--muted);margin-bottom:5px;
+    text-align:center;font-size:9.5px;color:var(--muted);margin-bottom:5px;
     white-space:nowrap;font-variant-numeric:tabular-nums;
   }
-  .centerbox .slot{height:27px;}
-  .cmid{display:block;margin:4px 0 7px 9px;font-size:9px;color:var(--mid);font-weight:600;letter-spacing:.4px;opacity:.7;}
+  .centerbox .slot{height:29px;}
+  .cmid{display:block;margin:4px 0 7px 9px;font-size:10px;color:var(--mid);font-weight:600;letter-spacing:.4px;opacity:.8;}
 
   /* the big trophy that sits above the final */
   .trophy-stage{
     position:absolute;z-index:5;width:120px;text-align:center;pointer-events:none;
   }
-  .trophy-svg{width:54px;height:54px;filter:drop-shadow(0 4px 10px rgba(255,182,39,.45));margin: 0 auto;}
-  .trophy-svg.dim{opacity:.32;filter:grayscale(.6);}
+  .trophy-svg{width:56px;height:56px;filter:drop-shadow(0 4px 10px rgba(217,148,5,.4));}
+  .trophy-svg.dim{opacity:.34;filter:grayscale(.7);}
   @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
   .trophy-svg.lit{animation:float 3s ease-in-out infinite;}
   .champ-name{
-    margin-top:2px;font-size:11px;font-weight:800;letter-spacing:.3px;
-    color:var(--gold);min-height:14px;
+    margin-top:2px;font-size:12px;font-weight:800;letter-spacing:.3px;
+    color:var(--gold-bd);min-height:15px;
   }
 
   /* confetti */
@@ -177,40 +185,41 @@
 
   /* footer controls */
   .footer{
-    margin-top:26px;background:linear-gradient(180deg,#121830,#0e1426);
+    margin-top:26px;background:#ffffff;
     border:1px solid var(--border);border-radius:12px;padding:18px 20px;
+    box-shadow:0 1px 4px rgba(28,42,90,.05);
   }
-  .footer h3{margin:0 0 6px;font-size:14px;letter-spacing:.2px;}
-  .footer p{margin:0 0 14px;font-size:12.5px;color:#9aa3bd;line-height:1.6;}
-  .footer p code{background:var(--grid);padding:1px 5px;border-radius:4px;font-size:11.5px;color:#cdd5ee;}
-  .footer b{color:#dfe5f5;}
+  .footer h3{margin:0 0 6px;font-size:15px;letter-spacing:.2px;color:var(--text);}
+  .footer p{margin:0 0 14px;font-size:13.5px;color:#586079;line-height:1.65;}
+  .footer p code{background:var(--grid);padding:1px 5px;border-radius:4px;font-size:12.5px;color:#3a4566;}
+  .footer b{color:var(--text);}
   .btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
   .btn{
-    border:1px solid #2f3a5c;background:#161d33;border-radius:8px;padding:8px 15px;
-    font-size:12.5px;font-weight:600;cursor:pointer;color:#cfd6ee;
+    border:1px solid #d3d9e8;background:#f7f9fd;border-radius:8px;padding:9px 16px;
+    font-size:13.5px;font-weight:600;cursor:pointer;color:#3a4566;
     display:inline-flex;align-items:center;gap:7px;
     transition:background .15s,border-color .15s,transform .08s;
   }
-  .btn:hover{background:#1d2742;border-color:#3a4870;}
+  .btn:hover{background:#eef2fa;border-color:#c2cbe0;}
   .btn:active{transform:translateY(1px);}
   .btn.primary{background:linear-gradient(92deg,var(--accent),#5b76ff);color:#fff;border-color:transparent;}
-  .btn.primary:hover{filter:brightness(1.08);}
+  .btn.primary:hover{filter:brightness(1.06);}
   .btn.gold{background:linear-gradient(92deg,var(--gold-bd),var(--gold));color:#3a2400;border-color:transparent;}
   .summary{
-    font-size:13px;color:#cdd5ee;padding:13px 15px;background:#0d1326;
-    border-radius:9px;border:1px solid #232c47;line-height:1.9;
+    font-size:14px;color:#3a4566;padding:14px 16px;background:#f7f9fd;
+    border-radius:9px;border:1px solid #e4e9f3;line-height:2;
   }
   .summary .lbl{color:var(--muted);font-weight:600;margin-right:6px;}
-  .summary .pill{display:inline-flex;align-items:center;gap:6px;background:#161d33;border:1px solid #2a3450;border-radius:99px;padding:3px 10px;font-weight:700;font-size:12px;}
-  .summary .pill img{width:17px;height:12px;border-radius:2px;}
+  .summary .pill{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #d9e0ee;border-radius:99px;padding:3px 11px;font-weight:700;font-size:13px;}
+  .summary .pill img{width:18px;height:13px;border-radius:2px;}
   .summary .pill.champ{background:linear-gradient(92deg,var(--champ1),var(--champ2));color:#3a2400;border-color:transparent;}
-  .saved{font-size:12px;color:#46c47e;font-weight:700;margin-left:auto;min-width:120px;text-align:right;}
+  .saved{font-size:12.5px;color:#1f9d5e;font-weight:700;margin-left:auto;min-width:120px;text-align:right;}
 
   .toast{
     position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);
     background:linear-gradient(92deg,var(--gold-bd),var(--gold));color:#3a2400;
-    font-weight:800;font-size:14px;padding:12px 22px;border-radius:99px;
-    box-shadow:0 8px 30px rgba(255,182,39,.4);z-index:60;opacity:0;
+    font-weight:800;font-size:15px;padding:13px 24px;border-radius:99px;
+    box-shadow:0 10px 34px rgba(217,148,5,.4);z-index:60;opacity:0;
     transition:opacity .3s,transform .3s;display:flex;align-items:center;gap:9px;
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -243,7 +252,7 @@
     <p>
       Every Round of 32 match is already filled. Advance teams two ways:
       <b>click</b> a team to push it forward, or <b>drag</b> it onto its <b>W…</b> placeholder in the next round.
-      The <b>third-place play-off fills itself</b> the moment both semi-final winners are chosen — the two losers drop straight in.
+      The <b>third-place play-off fills itself</b> the moment both semi-final winners are chosen — the two losers drop straight in, and you can <b>click one to award the bronze</b> 🥉.
       In the Final, click a finalist to <b>crown your champion</b> 🏆. The × clears a pick.
       Picks <b>auto-save in this browser</b>; <b>Export JSON</b> backs them up to a <code>bracket-data.json</code> file you can reload anytime.
     </p>
@@ -365,6 +374,7 @@ const headX = (side,round)=> side==='L'?XL[round]:XR[round];
 const state = {};
 MATCHES.forEach(m=>{ state[m.id] = m.round===0 ? [m.slots[0],m.slots[1]] : [null,null]; });
 let champion = null;
+let bronze = null;
 let dragTeam = null;
 let prevChampion = null;
 
@@ -414,6 +424,12 @@ function revalidate(){
     }
   }
   syncThirdPlace();
+  // bronze must still be one of the two 3rd-place participants
+  if(bronze){
+    const third=byId['M103'];
+    const ps=[resolved(third,0),resolved(third,1)].filter(Boolean);
+    if(!ps.includes(bronze)) bronze=null;
+  }
 }
 
 /* ---------------- persistence ---------------- */
@@ -421,7 +437,7 @@ const KEY = 'wc2026_bracket_v2';
 function snapshot(){
   const picks={};
   MATCHES.forEach(m=>{ if(m.round>0 && m.round!==5) picks[m.id]=state[m.id].slice(); });
-  return {v:2, picks, champion};
+  return {v:2, picks, champion, bronze};
 }
 let savedTimer=null;
 function markSaved(txt){
@@ -440,6 +456,7 @@ function applySnapshot(d){
     if(m.round>0 && m.round!==5) state[m.id] = d.picks[m.id] ? d.picks[m.id].slice() : [null,null];
   });
   champion = d.champion || null;
+  bronze = d.bronze || null;
   revalidate();
 }
 function loadStored(){
@@ -612,8 +629,8 @@ function render(){
       lastState[key] = team;
 
       s.classList.toggle('resolved',!!team);
-      s.draggable=!!team;
-      s.classList.remove('is-winner','is-loser','is-champion','just-set');
+      s.draggable = !!team && m.round!==5; // 3rd place isn't dragged, just clicked
+      s.classList.remove('is-winner','is-loser','is-champion','is-bronze','just-set');
       if(team){
         let extra='';
         if(m.round<=3){
@@ -621,8 +638,13 @@ function render(){
           if(w){ s.classList.add(team===w?'is-winner':'is-loser'); }
         }else if(m.round===4){
           if(champion && team===champion){ s.classList.add('is-champion'); extra=`<span class="trophy-inline">${TROPHY_SVG}</span>`; }
+        }else if(m.round===5){
+          if(bronze){ 
+            if(team===bronze){ s.classList.add('is-bronze'); extra=`<span class="medal-inline">🥉</span>`; }
+            else s.classList.add('is-loser');
+          }
         }
-        const clr = (m.round>0 && m.round!==5) ? `<button class="clr" data-mid="${m.id}" data-i="${i}" title="clear">×</button>` : '';
+        const clr = (m.round>0) ? `<button class="clr" data-mid="${m.id}" data-i="${i}" title="clear">×</button>` : '';
         s.innerHTML = flagImg(team)+`<span class="code">${team}</span>`+clr+extra;
         if(changed && m.round>0) s.classList.add('just-set');
       }else{
@@ -674,8 +696,9 @@ function updateSummary(){
   const t1=resolved(third,0), t2=resolved(third,1);
   document.getElementById('summary').innerHTML =
     `<span class="lbl">Final:</span> ${pill(f1)} <span style="color:var(--muted)">vs</span> ${pill(f2)}<br>`+
-    `<span class="lbl">3rd-place play-off:</span> ${pill(t1)} <span style="color:var(--muted)">vs</span> ${pill(t2)}<br>`+
-    `<span class="lbl">Champion:</span> ${champion?pill(champion,true):'<span class="pill" style="opacity:.5">not crowned yet</span>'}`;
+    `<span class="lbl">Champion:</span> ${champion?pill(champion,true):'<span class="pill" style="opacity:.5">not crowned yet</span>'}<br>`+
+    `<span class="lbl">3rd place:</span> ${bronze?pill(bronze):'<span class="pill" style="opacity:.5">—</span>'} `+
+    `<span style="color:var(--muted);font-size:12px">(play-off: ${t1||'?'} vs ${t2||'?'})</span>`;
 }
 
 /* ---------------- celebration ---------------- */
@@ -741,7 +764,11 @@ function clearHi(){ document.querySelectorAll('.drop-ok').forEach(x=>x.classList
 
 bracket.addEventListener('click',e=>{
   const clr=e.target.closest('.clr');
-  if(clr){ state[clr.dataset.mid][+clr.dataset.i]=null; revalidate(); render(); save(); return; }
+  if(clr){
+    const m=byId[clr.dataset.mid];
+    if(m.round===5){ bronze=null; render(); save(); return; }
+    state[clr.dataset.mid][+clr.dataset.i]=null; revalidate(); render(); save(); return;
+  }
   const s=e.target.closest('.slot'); if(!s) return;
   const [,mid,i]=s.id.split('-'); const m=byId[mid];
   const team=resolved(m,+i); if(!team) return;
@@ -751,13 +778,15 @@ bracket.addEventListener('click',e=>{
     revalidate(); render(); maybeCelebrate(); save();
   }else if(m.round===4){
     champion = (champion===team)?null:team; render(); maybeCelebrate(); save();
+  }else if(m.round===5){
+    bronze = (bronze===team)?null:team; render(); save();
   }
 });
 
 /* auto-fill + reset */
 function simulate(){
   MATCHES.forEach(m=>{ if(m.round>0 && m.round!==5) state[m.id]=[null,null]; });
-  champion=null; prevChampion=null;
+  champion=null; bronze=null; prevChampion=null;
   [0,1,2,3].forEach(r=>{
     MATCHES.filter(m=>m.round===r).forEach(m=>{
       const t=[resolved(m,0),resolved(m,1)];
@@ -769,11 +798,15 @@ function simulate(){
   });
   const fin=byId['M104']; const fs=[resolved(fin,0),resolved(fin,1)].filter(Boolean);
   if(fs.length===2) champion=fs[Math.floor(Math.random()*2)];
-  revalidate(); render(); maybeCelebrate(); save();
+  revalidate();
+  // pick a random bronze from the now-filled 3rd-place match
+  const third=byId['M103']; const bs=[resolved(third,0),resolved(third,1)].filter(Boolean);
+  if(bs.length===2) bronze=bs[Math.floor(Math.random()*2)];
+  render(); maybeCelebrate(); save();
 }
 function resetAll(){
   MATCHES.forEach(m=>{ if(m.round>0 && m.round!==5) state[m.id]=[null,null]; });
-  champion=null; prevChampion=null; revalidate(); render(); save();
+  champion=null; bronze=null; prevChampion=null; revalidate(); render(); save();
   markSaved('Cleared ✓');
 }
 document.getElementById('simBtn').addEventListener('click',simulate);
