@@ -175,9 +175,13 @@ function loadFromURL() {
   const searchParams = new URLSearchParams(location.search || '');
   const m = searchParams.get('p');
   if (!m) {
+    // Hash-style link, e.g. #p=...&n=Rupash
     const h = location.hash || '';
     const hashMatch = h.match(/[#&]p=([^&]+)/);
     if (!hashMatch) return false;
+    // pull the name out of the hash too (this was previously missed)
+    const hashName = h.match(/[#&]n=([^&]+)/);
+    if (hashName) { try { playerName = decodeURIComponent(hashName[1]).slice(0, 40); } catch (e) { playerName = ''; } }
     try { return decodeShare(decodeURIComponent(hashMatch[1])); }
     catch (e) { return false; }
   }
