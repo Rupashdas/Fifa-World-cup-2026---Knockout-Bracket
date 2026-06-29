@@ -611,6 +611,11 @@ function showShareStep() {
   if (history.replaceState) history.replaceState(null, '', buildShareURL().split(location.pathname)[1] || '');
 }
 
+function requireNameThen(callback) {
+  if (playerName) { callback(); return; }
+  showNameStep({ mode: 'share', after: callback });
+}
+
 /* The name step can be opened in two contexts:
    - 'start'  : user is beginning their own prediction (from "Make your own" or first pick)
    - 'share'  : (legacy) — name confirmation right before sharing
@@ -672,9 +677,9 @@ document.getElementById('nameNext').addEventListener('click', commitName);
 document.getElementById('nameSkip').addEventListener('click', skipName);
 document.getElementById('editName').addEventListener('click', () => showNameStep({ mode: 'share' }));
 nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') commitName(); });
-document.getElementById('shareWhatsApp').addEventListener('click', () => { window.open(whatsappURL(), '_blank', 'noopener'); });
+document.getElementById('shareWhatsApp').addEventListener('click', () => { requireNameThen(() => { window.open(whatsappURL(), '_blank', 'noopener'); }); });
 const fbPageButton = document.getElementById('shareFacebookPage');
-if (fbPageButton) fbPageButton.addEventListener('click', facebookShare);
+if (fbPageButton) fbPageButton.addEventListener('click', () => { requireNameThen(facebookShare); });
 
 document.getElementById('copyLink').addEventListener('click', async () => {
   const url = shareLinkInput.value;
