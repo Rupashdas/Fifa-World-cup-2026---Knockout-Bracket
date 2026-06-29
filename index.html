@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -11,11 +11,11 @@
 <div class="page">
   <div class="topbar">
     <div class="topbar-text">
-      <h1 class="title">Road to the Final</h1>
-      <p class="subtitle">FIFA World Cup 26™ predictor — tap a team to send it to the next round.</p>
+      <h1 class="title">ফাইনালের পথে</h1>
+      <p class="subtitle">ফিফা বিশ্বকাপ ২০২৬™ ভবিষ্যদ্বাণী — কোনো দলকে ট্যাপ করে পরের রাউন্ডে পাঠান।</p>
     </div>
     <div class="progress-wrap">
-      <div class="progress-label"><span>Your bracket</span><span id="progPct">0%</span></div>
+      <div class="progress-label"><span>আপনার ব্র্যাকেট</span><span id="progPct">0%</span></div>
       <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
     </div>
   </div>
@@ -23,39 +23,41 @@
   <div class="predby" id="predBy" hidden>
     <span class="predby-ico">&#128302;</span>
     <span>
-      <span class="predby-label">Prediction by</span>
+      <span class="predby-label">ভবিষ্যদ্বাণী করেছেন</span>
       <b id="predByName"></b>
     </span>
-    <button class="predby-mine" id="makeOwn">Make your own &rarr;</button>
+    <button class="predby-mine" id="makeOwn">নিজেরটি তৈরি করুন &rarr;</button>
   </div>
 
   <div class="scroller" id="scroller">
     <div class="bracket" id="bracket"></div>
   </div>
-  <p class="scroll-hint" id="scrollHint">&#8592; swipe to see the whole bracket &#8594;</p>
+  <p class="scroll-hint" id="scrollHint">&#8592; পুরো ব্র্যাকেট দেখতে সোয়াইপ করুন &#8594;</p>
 
   <div class="summary-card" id="summaryCard">
     <div class="summary" id="summary"></div>
   </div>
 
   <div class="howto">
-    <h3>How it works</h3>
+    <h3>এটি কীভাবে কাজ করে</h3>
     <ol class="howto-list">
-      <li><b>Tap a team</b> to send it through to the next round.</li>
-      <li>Keep going until the <b>Final</b> — tap a finalist to <b>crown your champion</b> &#127942;.</li>
-      <li>The <b>3rd-place match</b> fills in by itself. Tap a team there for the <b>bronze</b> &#129353;.</li>
-      <li>Tap the <b>&times;</b> on any team to undo a pick. Your bracket saves automatically.</li>
+      <li><b>কোনো দল ট্যাপ করুন</b> পরের রাউন্ডে পাঠাতে।</li>
+      <li><b>ফাইনাল</b> পর্যন্ত যান — ফাইনালিস্ট ট্যাপ করে <b>আপনার চ্যাম্পিয়ন বেছে নিন</b> &#127942;।</li>
+      <li><b>তৃতীয় স্থান ম্যাচ</b> নিজেরাই পূরণ হবে। সেখানে কোনো দল ট্যাপ করলে <b>ব্রোঞ্জ</b> &#129353; নির্ধারিত হবে।</li>
+      <li>কোনো দলের পাশে থাকা <b>&times;</b> ট্যাপ করলে পিক ফিরিয়ে নেওয়া যাবে। আপনার ব্র্যাকেট স্বয়ংক্রিয়ভাবে সংরক্ষিত হবে।</li>
     </ol>
   </div>
+
+  <div class="copyright-credit">© ২০২৬ • Developed & Designed by Rupash Das (রুপস দাশ)</div>
 </div>
 
 <div class="actionbar">
-  <button class="ab-btn" id="simBtn"><span class="ab-ico">&#127922;</span><span>Auto-fill</span></button>
-  <button class="ab-btn" id="resetBtn"><span class="ab-ico">&#8634;</span><span>Reset</span></button>
-  <button class="ab-btn ab-png" id="pngBtn"><span class="ab-ico">&#128247;</span><span>Save image</span></button>
+  <button class="ab-btn" id="simBtn"><span class="ab-ico">&#127922;</span><span>স্বয়ংক্রিয় পূরণ</span></button>
+  <button class="ab-btn" id="resetBtn"><span class="ab-ico">&#8634;</span><span>রিসেট</span></button>
+  <button class="ab-btn ab-png" id="pngBtn"><span class="ab-ico">&#128247;</span><span>ছবি সংরক্ষণ</span></button>
   <button class="ab-btn ab-share" id="shareBtn">
     <svg class="wa-ico" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.7 1.9 6.7L3 29l7-1.8c1.9 1 4 1.6 6 1.6 7 0 12.5-5.5 12.5-12.5S23 3 16 3zm0 22.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-4.2 1.1 1.1-4-.3-.4a10.2 10.2 0 0 1-1.6-5.5c0-5.7 4.6-10.3 10.3-10.3S26.3 9.8 26.3 15.5 21.7 25.8 16 25.8zm5.7-7.7c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.6s-.7-1.7-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.4 3.7 5.9 5.2 2.2.9 3 1 4.1.9.7-.1 1.8-.7 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4z"/></svg>
-    <span>Share</span>
+    <span>শেয়ার</span>
   </button>
 </div>
 
@@ -66,29 +68,29 @@
 
     <!-- STEP 1: ask for a name -->
     <div class="sheet-step" id="nameStep">
-      <h3 id="nameStepTitle">What's your name?</h3>
-      <p class="sheet-sub" id="nameStepSub">We'll put your name on your bracket so friends know whose prediction it is.</p>
-      <input type="text" id="nameInput" class="name-input" placeholder="e.g. Rupash" maxlength="40" autocomplete="name">
-      <button class="wa-big plain" id="nameNext"><span>Start my prediction</span></button>
-      <button class="skip-link" id="nameSkip">Skip for now</button>
+      <h3 id="nameStepTitle">আপনার নাম কী?</h3>
+      <p class="sheet-sub" id="nameStepSub">আপনার ব্র্যাকেটের উপর আপনার নাম লিখে দেব, যাতে বন্ধুদের জানা যায় এটা কার ভবিষ্যদ্বাণী।</p>
+      <input type="text" id="nameInput" class="name-input" placeholder="যেমন: Rupash" maxlength="40" autocomplete="name">
+      <button class="wa-big plain" id="nameNext"><span>আমার ভবিষ্যদ্বাণী শুরু করুন</span></button>
+      <button class="skip-link" id="nameSkip">এখন না</button>
     </div>
 
     <!-- STEP 2: share options -->
     <div class="sheet-step" id="shareStep" hidden>
-      <h3 id="shareTitle">Share your bracket</h3>
-      <p class="sheet-sub" id="shareSub">Send your prediction to friends. The whole bracket is inside the link &mdash; no app or sign-up needed to view it.</p>
+      <h3 id="shareTitle">আপনার ব্র্যাকেট শেয়ার করুন</h3>
+      <p class="sheet-sub" id="shareSub">আপনার ভবিষ্যদ্বাণী বন্ধুদের কাছে পাঠান। পুরো ব্র্যাকেট লিংকের ভেতরেই আছে — দেখতে কোনো অ্যাপ বা সাইন-আপ লাগবে না।</p>
 
       <button class="wa-big" id="shareWhatsApp">
         <svg class="wa-ico" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.7 1.9 6.7L3 29l7-1.8c1.9 1 4 1.6 6 1.6 7 0 12.5-5.5 12.5-12.5S23 3 16 3zm0 22.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-4.2 1.1 1.1-4-.3-.4a10.2 10.2 0 0 1-1.6-5.5c0-5.7 4.6-10.3 10.3-10.3S26.3 9.8 26.3 15.5 21.7 25.8 16 25.8zm5.7-7.7c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.6s-.7-1.7-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.4 3.7 5.9 5.2 2.2.9 3 1 4.1.9.7-.1 1.8-.7 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4z"/></svg>
-        Share on WhatsApp
+        হোয়াটসঅ্যাপে শেয়ার করুন
       </button>
 
       <div class="copy-row">
         <input type="text" id="shareLink" readonly>
-        <button class="copy-btn" id="copyLink">Copy link</button>
+        <button class="copy-btn" id="copyLink">লিংক কপি করুন</button>
       </div>
       <div class="share-note" id="shareNote"></div>
-      <button class="skip-link" id="editName">&larr; Change name</button>
+      <button class="skip-link" id="editName">&larr; নাম পরিবর্তন করুন</button>
     </div>
   </div>
 </div>
