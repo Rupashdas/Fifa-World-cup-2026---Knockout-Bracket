@@ -491,6 +491,17 @@ function takeOverIfShared() {
   }
 }
 
+/* A fresh visitor (not from a shared link, no name yet) is asked their name
+   once, right after their first pick — so their bracket is named before sharing. */
+let askedNameOnce = false;
+function maybeAskNameAfterFirstPick() {
+  if (askedNameOnce) return;
+  if (viewingShared) return;          // shared-takeover handles its own naming
+  if (playerName || loadName()) { askedNameOnce = true; playerName = playerName || loadName(); renderPredBy(); return; }
+  askedNameOnce = true;
+  showNameStep({ mode: 'start', after: () => { closeShare(); renderPredBy(); render(); } });
+}
+
 bracket.addEventListener('click', e => {
   const clr = e.target.closest('.clr');
   if (clr) {
@@ -506,11 +517,11 @@ bracket.addEventListener('click', e => {
   if (m.round <= 3) {
     const d = downstream[mid]; if (!d) return;
     state[d.mid][d.sidx] = (state[d.mid][d.sidx] === team) ? null : team;
-    revalidate(); render(); maybeCelebrate(); save();
+    revalidate(); render(); maybeCelebrate(); save(); maybeAskNameAfterFirstPick();
   } else if (m.round === 4) {
-    champion = (champion === team) ? null : team; render(); maybeCelebrate(); save();
+    champion = (champion === team) ? null : team; render(); maybeCelebrate(); save(); maybeAskNameAfterFirstPick();
   } else if (m.round === 5) {
-    bronze = (bronze === team) ? null : team; render(); save();
+    bronze = (bronze === team) ? null : team; render(); save(); maybeAskNameAfterFirstPick();
   }
 });
 
@@ -575,17 +586,40 @@ function showShareStep() {
   shareNote.textContent = '';
   if (history.replaceState) history.replaceState(null, '', buildShareURL().split(location.pathname)[1] || '');
 }
-function showNameStep() {
-  shareStep.hidden = true; nameStep.hidden = false;
+
+/* The name step can be opened in two contexts:
+   - 'start'  : user is beginning their own prediction (from "Make your own" or first pick)
+   - 'share'  : (legacy) — name confirmation right before sharing
+   nameAfter() decides what happens once a name is committed/skipped. */
+let nameAfter = null;
+function showNameStep(opts) {
+  opts = opts || {};
+  nameStep.hidden = false; shareStep.hidden = true;
+  // contextual copy
+  const t = document.getElementById('nameStepTitle');
+  const s = document.getElementById('nameStepSub');
+  const btn = document.getElementById('nameNext');
+  const btnSpan = btn ? btn.querySelector('span') : null;
+  if (opts.mode === 'start') {
+    if (t) t.textContent = "What's your name?";
+    if (s) s.textContent = "We'll put your name on your bracket so friends know whose prediction it is.";
+    if (btnSpan) btnSpan.textContent = 'Start my prediction';
+  } else {
+    if (t) t.textContent = "What's your name?";
+    if (s) s.textContent = "We'll show it on your bracket so friends know whose prediction it is.";
+    if (btnSpan) btnSpan.textContent = 'Continue to share';
+  }
+  nameAfter = opts.after || null;
   nameInput.value = playerName || loadName();
-  setTimeout(() => nameInput.focus(), 250);
-}
-function openShare() {
   shareModal.classList.add('show');
   shareModal.setAttribute('aria-hidden', 'false');
-  // if we already know the name (saved or from a viewed link), skip straight to share
-  if (playerName || loadName()) { playerName = playerName || loadName(); showShareStep(); }
-  else showNameStep();
+  setTimeout(() => { nameInput.focus(); nameInput.select && nameInput.select(); }, 250);
+}
+function openShare() {
+  // name already known by now → go straight to share options
+  shareModal.classList.add('show');
+  shareModal.setAttribute('aria-hidden', 'false');
+  showShareStep();
 }
 function closeShare() {
   shareModal.classList.remove('show');
@@ -596,15 +630,23 @@ function commitName() {
   playerName = v;
   if (v) persistName();
   renderPredBy();
-  showShareStep();
+  const cb = nameAfter; nameAfter = null;
+  if (cb) cb();
+  else showShareStep();
+}
+function skipName() {
+  playerName = ''; renderPredBy();
+  const cb = nameAfter; nameAfter = null;
+  if (cb) cb();
+  else showShareStep();
 }
 
 document.getElementById('shareBtn').addEventListener('click', openShare);
 document.getElementById('shareClose').addEventListener('click', closeShare);
 shareModal.addEventListener('click', e => { if (e.target === shareModal) closeShare(); });
 document.getElementById('nameNext').addEventListener('click', commitName);
-document.getElementById('nameSkip').addEventListener('click', () => { playerName = ''; renderPredBy(); showShareStep(); });
-document.getElementById('editName').addEventListener('click', showNameStep);
+document.getElementById('nameSkip').addEventListener('click', skipName);
+document.getElementById('editName').addEventListener('click', () => showNameStep({ mode: 'share' }));
 nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') commitName(); });
 document.getElementById('shareWhatsApp').addEventListener('click', () => { window.open(whatsappURL(), '_blank', 'noopener'); });
 
@@ -620,26 +662,46 @@ document.getElementById('copyLink').addEventListener('click', async () => {
   }
 });
 
-/* "X's prediction" banner shown when viewing a named, shared bracket */
+/* Banner showing whose prediction is on screen.
+   - viewing someone else's shared bracket  -> name + "Make your own"
+   - your own named bracket                  -> name + "Edit name" */
 function renderPredBy() {
   const bar = document.getElementById('predBy');
   if (!bar) return;
-  if (viewingShared && playerName) {
+  const mineBtn = document.getElementById('makeOwn');
+  if (playerName) {
     document.getElementById('predByName').textContent = playerName;
     bar.hidden = false;
+    if (viewingShared) {
+      mineBtn.textContent = 'Make your own →';
+      mineBtn.dataset.act = 'own';
+    } else {
+      mineBtn.textContent = 'Edit name';
+      mineBtn.dataset.act = 'edit';
+    }
   } else {
     bar.hidden = true;
   }
 }
-document.getElementById('makeOwn').addEventListener('click', () => {
-  // clear the "viewing someone else's" state and start fresh
-  viewingShared = false; playerName = '';
+function startFreshBracket() {
+  viewingShared = false;
   MATCHES.forEach(m => { if (m.round > 0 && m.round !== 5) state[m.id] = [null, null]; });
   champion = null; bronze = null; prevChampion = null;
   revalidate();
   if (history.replaceState) history.replaceState(null, '', location.pathname);
   renderPredBy(); render();
+  closeShare();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.getElementById('makeOwn').addEventListener('click', e => {
+  if (e.currentTarget.dataset.act === 'edit') {
+    // editing the name on your own bracket — don't wipe picks
+    showNameStep({ mode: 'start', after: () => { closeShare(); renderPredBy(); render(); } });
+  } else {
+    // taking over someone else's shared bracket — ask name, then clean slate
+    playerName = '';
+    showNameStep({ mode: 'start', after: startFreshBracket });
+  }
 });
 
 /* ============================================================
@@ -669,116 +731,200 @@ async function exportPNG() {
   const label = btn.querySelector('span:last-child');
   const old = label.textContent; label.textContent = 'Saving…'; btn.style.pointerEvents = 'none';
   try {
-    const S = 2;                // retina scale
-    const W = 1080, H = 1080;     // square — perfect for sharing
+    const S = 2;                         // retina scale
+    const BW = 1130, BH = 800;             // native bracket coordinate space
+    const PAD = 40;                      // side padding
+    const HEAD = champion ? 210 : 170;       // header band height
+    const FOOT = 70;
+    const W = BW + PAD * 2;
+    const H = HEAD + BH + FOOT;
     const c = document.createElement('canvas');
     c.width = W * S; c.height = H * S;
     const ctx = c.getContext('2d');
     ctx.scale(S, S);
 
-    // background
-    const g = ctx.createLinearGradient(0, 0, W, H);
-    g.addColorStop(0, '#1b2350'); g.addColorStop(.55, '#2c3a86'); g.addColorStop(1, '#0f1638');
+    /* ---- background ---- */
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#1b2350'); g.addColorStop(.5, '#26307a'); g.addColorStop(1, '#141b44');
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-    // soft glow
-    const rg = ctx.createRadialGradient(W / 2, 300, 40, W / 2, 300, 600);
-    rg.addColorStop(0, 'rgba(255,200,80,.22)'); rg.addColorStop(1, 'rgba(255,200,80,0)');
-    ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
 
+    /* ---- header ---- */
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#cdd6ff';
-    ctx.font = '600 30px -apple-system,Segoe UI,Roboto,sans-serif';
-    ctx.fillText('FIFA WORLD CUP 2026', W / 2, 92);
+    ctx.fillStyle = '#aeb8ee';
+    ctx.font = '700 26px -apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.fillText('FIFA WORLD CUP 2026  •  KNOCKOUT BRACKET', W / 2, 52);
     ctx.fillStyle = '#ffffff';
-    ctx.font = '800 58px -apple-system,Segoe UI,Roboto,sans-serif';
-    ctx.fillText(playerName ? `${playerName}'s Bracket` : 'My Bracket Prediction', W / 2, 158);
+    ctx.font = '800 68px -apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.fillText(playerName ? `${playerName}'s Prediction` : 'My Bracket Prediction', W / 2, 122);
 
-    const drawFlag = async (code, cx, cy, fw) => {
-      const fh = fw * 0.7;
-      try {
-        const im = await loadImg(flagURL(code));
-        roundRect(ctx, cx - fw / 2, cy - fh / 2, fw, fh, 6); ctx.save(); ctx.clip();
-        ctx.drawImage(im, cx - fw / 2, cy - fh / 2, fw, fh); ctx.restore();
-        ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255,255,255,.5)';
-        roundRect(ctx, cx - fw / 2, cy - fh / 2, fw, fh, 6); ctx.stroke();
-      } catch (e) { }
-    };
+    /* preload every flag we need */
+    const codes = new Set();
+    MATCHES.forEach(m => { [0, 1].forEach(i => { const t = resolved(m, i); if (t) codes.add(t); }); });
+    const flags = {};
+    await Promise.all([...codes].map(async code => {
+      try { flags[code] = await loadImg(flagURL(code)); } catch (e) { flags[code] = null; }
+    }));
+    let trophyImg = null;
+    try { trophyImg = await loadImg('data:image/svg+xml;base64,' + btoa(TROPHY_SVG)); } catch (e) { }
 
-    // ----- champion block -----
-    const champY = 300;
+    /* champion strip in header */
     if (champion) {
-      // trophy
-      const tr = await loadImg('data:image/svg+xml;base64,' + btoa(TROPHY_SVG));
-      ctx.drawImage(tr, W / 2 - 55, champY - 180, 110, 110);
+      const cy = 172;
+      if (trophyImg) ctx.drawImage(trophyImg, W / 2 - 150, cy - 34, 50, 50);
+      ctx.textAlign = 'left';
       ctx.fillStyle = '#ffd86b';
-      ctx.font = '700 26px -apple-system,Segoe UI,Roboto,sans-serif';
-      ctx.fillText('CHAMPION', W / 2, champY - 12);
-      await drawFlag(champion, W / 2 - 130, champY + 44, 78);
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '800 56px -apple-system,Segoe UI,Roboto,sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(tname(champion), W / 2 - 78, champY + 62);
+      ctx.font = '800 40px -apple-system,Segoe UI,Roboto,sans-serif';
+      const champTxt = 'Champion: ' + tname(champion);
+      const tw = ctx.measureText(champTxt).width;
+      // center the trophy+text group
+      const startX = W / 2 - 90;
+      ctx.fillText(champTxt, startX, cy + 6);
       ctx.textAlign = 'center';
-    } else {
-      ctx.fillStyle = '#9aa6e0';
-      ctx.font = '600 34px -apple-system,Segoe UI,Roboto,sans-serif';
-      ctx.fillText('Champion not decided yet', W / 2, champY);
     }
 
-    // ----- card helper -----
-    const fin = byId['M104'];
-    const f1 = resolved(fin, 0), f2 = resolved(fin, 1);
-    const third = byId['M103'];
-    const t1 = resolved(third, 0), t2 = resolved(third, 1);
-    const bz = bronze;
+    /* ---- bracket origin ---- */
+    const OX = PAD, OY = HEAD;
+    const px = x => OX + x, py = y => OY + y;
 
-    async function teamRow(label, code, y, tint) {
-      ctx.fillStyle = tint || 'rgba(255,255,255,.07)';
-      roundRect(ctx, 140, y, W - 280, 84, 16); ctx.fill();
-      ctx.fillStyle = '#aeb8ee';
-      ctx.font = '700 22px -apple-system,Segoe UI,Roboto,sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(label.toUpperCase(), 168, y + 34);
-      if (code) {
-        await drawFlag(code, 200, y + 58, 46);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '700 30px -apple-system,Segoe UI,Roboto,sans-serif';
-        ctx.fillText(tname(code), 240, y + 68);
-      } else {
-        ctx.fillStyle = '#7e88bf';
-        ctx.font = '500 26px -apple-system,Segoe UI,Roboto,sans-serif';
-        ctx.fillText('—', 168, y + 68);
+    /* connector lines (same math as buildConnectors) */
+    const segs = [];
+    const addLine = (x1, y1, x2, y2, key) => segs.push({ x1, y1, x2, y2, key });
+    MATCHES.forEach(m => {
+      if (m.round >= 1 && m.round <= 3) {
+        const a = matchAt(m.side, m.round - 1, m.idx * 2), b = matchAt(m.side, m.round - 1, m.idx * 2 + 1);
+        const aY = cardY(a), bY = cardY(b), tY = cardY(m);
+        if (m.side === 'L') {
+          const fR = cardX(a) + CARD_W, tL = cardX(m), midX = (fR + tL) / 2;
+          addLine(fR, aY, midX, aY, a.id); addLine(fR, bY, midX, bY, b.id);
+          addLine(midX, aY, midX, bY, m.id + '_v'); addLine(midX, tY, tL, tY, m.id + '_in');
+        } else {
+          const fL = cardX(a), tR = cardX(m) + CARD_W, midX = (fL + tR) / 2;
+          addLine(fL, aY, midX, aY, a.id); addLine(fL, bY, midX, bY, b.id);
+          addLine(midX, aY, midX, bY, m.id + '_v'); addLine(midX, tY, tR, tY, m.id + '_in');
+        }
       }
+    });
+    const finM = byId['M104'], finY = cardY(finM), finBottom = finY + 54, finCx = cardX(finM) + CARD_W / 2;
+    const sfL = byId['M101'], sfR = byId['M102'];
+    const sfTop = cardY(sfL) - 28, sfLcx = cardX(sfL) + CARD_W / 2, sfRcx = cardX(sfR) + CARD_W / 2;
+    const midY = (finBottom + sfTop) / 2;
+    addLine(finCx, finBottom, finCx, midY, 'M101'); addLine(sfLcx, midY, finCx, midY, 'M101');
+    addLine(sfRcx, midY, finCx, midY, 'M102'); addLine(sfLcx, midY, sfLcx, sfTop, 'M101');
+    addLine(sfRcx, midY, sfRcx, sfTop, 'M102');
+
+    segs.forEach(s => {
+      const base = s.key.replace(/_.*$/, ''); const lit = winnerOf(base);
+      ctx.strokeStyle = lit ? 'rgba(255,200,80,.6)' : 'rgba(255,255,255,.18)';
+      ctx.lineWidth = lit ? 2 : 1.4;
+      ctx.beginPath(); ctx.moveTo(px(s.x1), py(s.y1)); ctx.lineTo(px(s.x2), py(s.y2)); ctx.stroke();
+    });
+
+    /* round headers */
+    ctx.fillStyle = '#9aa6e0';
+    ctx.font = '700 13px -apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.textAlign = 'center';
+    const heads = [['ROUND OF 32', 'L', 0], ['ROUND OF 16', 'L', 1], ['QUARTER-FINAL', 'L', 2], ['SEMI-FINAL', 'L', 3],
+    ['SEMI-FINAL', 'R', 3], ['QUARTER-FINAL', 'R', 2], ['ROUND OF 16', 'R', 1], ['ROUND OF 32', 'R', 0]];
+    heads.forEach(([txt, side, round]) => {
+      const x = (side === 'L' ? XL[round] : XR[round]) + CARD_W / 2;
+      ctx.fillText(txt, px(x), py(16));
+    });
+
+    /* a single team slot */
+    function drawSlot(code, x, y, w, h, opts) {
+      opts = opts || {};
+      // background tint
+      let bg = 'rgba(255,255,255,.92)';
+      if (opts.champion) bg = '#ffd86b';
+      else if (opts.bronze) bg = '#e9c48c';
+      else if (opts.winner) bg = '#e8f5ee';
+      else if (opts.loser) bg = 'rgba(255,255,255,.5)';
+      ctx.fillStyle = bg;
+      ctx.fillRect(x, y, w, h);
+      // winner accent bar
+      if (opts.winner || opts.champion || opts.bronze) {
+        ctx.fillStyle = opts.bronze ? '#b07d2e' : (opts.champion ? '#d99405' : '#d99405');
+        ctx.fillRect(x, y, 3, h);
+      }
+      // flag
+      const fw = 22, fh = 15, fx = x + 10, fy = y + (h - fh) / 2;
+      if (code && flags[code]) {
+        ctx.save(); ctx.beginPath(); ctx.rect(fx, fy, fw, fh); ctx.clip();
+        ctx.drawImage(flags[code], fx, fy, fw, fh); ctx.restore();
+        ctx.strokeStyle = 'rgba(0,0,0,.15)'; ctx.lineWidth = .5; ctx.strokeRect(fx, fy, fw, fh);
+      }
+      // name
+      ctx.textAlign = 'left';
+      ctx.fillStyle = opts.loser ? '#9aa1b5' : (opts.champion || opts.bronze ? '#3a2400' : '#1c2336');
+      ctx.font = (opts.winner || opts.champion ? '800' : '600') + ' 14px -apple-system,Segoe UI,Roboto,sans-serif';
+      const nm = code ? tname(code) : (opts.ph || '');
+      if (!code) { ctx.fillStyle = '#aab1c4'; ctx.font = '500 12px sans-serif'; }
+      ctx.fillText(nm, x + 38, y + h / 2 + 5);
+      // medal/trophy
+      if (opts.champion && trophyImg) ctx.drawImage(trophyImg, x + w - 22, y + (h - 18) / 2, 18, 18);
       ctx.textAlign = 'center';
     }
 
-    // ----- final -----
-    let y = 560;
-    ctx.fillStyle = 'rgba(255,255,255,.07)';
-    roundRect(ctx, 140, y, W - 280, 108, 16); ctx.fill();
-    ctx.fillStyle = '#aeb8ee'; ctx.font = '700 22px -apple-system,Segoe UI,Roboto,sans-serif';
-    ctx.textAlign = 'left'; ctx.fillText('THE FINAL', 168, y + 34);
-    if (f1) { await drawFlag(f1, 200, y + 74, 46); ctx.fillStyle = '#fff'; ctx.font = '700 30px -apple-system,Segoe UI,Roboto,sans-serif'; ctx.fillText(tname(f1), 240, y + 84); }
-    else { ctx.fillStyle = '#7e88bf'; ctx.font = '500 26px sans-serif'; ctx.fillText('—', 168, y + 84); }
-    ctx.textAlign = 'center'; ctx.fillStyle = '#ffd86b'; ctx.font = '800 24px sans-serif'; ctx.fillText('vs', W / 2, y + 78);
-    ctx.textAlign = 'right';
-    if (f2) { ctx.fillStyle = '#fff'; ctx.font = '700 30px -apple-system,Segoe UI,Roboto,sans-serif'; ctx.fillText(tname(f2), W - 240, y + 84); await drawFlag(f2, W - 200, y + 74, 46); }
-    else { ctx.fillStyle = '#7e88bf'; ctx.font = '500 26px sans-serif'; ctx.fillText('—', W - 168, y + 84); }
+    /* draw a match card (two slots) */
+    function drawCard(m) {
+      const x = px(cardX(m)), y = py(cardY(m) - 27), w = CARD_W, slotH = 31;
+      // card frame
+      ctx.fillStyle = 'rgba(255,255,255,.92)';
+      roundRect(ctx, x, y, w, slotH * 2, 5); ctx.fill();
+      const w0 = winnerOf(m.id);
+      [0, 1].forEach(i => {
+        const code = resolved(m, i);
+        const isW = code && w0 && code === w0;
+        const isL = code && w0 && code !== w0;
+        drawSlot(code, x, y + i * slotH, w, slotH, { winner: isW, loser: isL, ph: m.slots[i] });
+      });
+      // divider
+      ctx.strokeStyle = 'rgba(0,0,0,.07)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, y + slotH); ctx.lineTo(x + w, y + slotH); ctx.stroke();
+      // outline
+      ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = 1;
+      roundRect(ctx, x, y, w, slotH * 2, 5); ctx.stroke();
+    }
+
+    MATCHES.filter(m => m.round <= 3).forEach(drawCard);
+
+    /* center boxes: Final + 3rd place */
+    function drawCenter(m, title, gold) {
+      const x = px(cardX(m)), slotH = 31, boxH = slotH * 2 + 34;
+      const y = py(cardY(m)) - boxH / 2, w = CARD_W;
+      // title
+      ctx.fillStyle = gold ? '#ffd86b' : '#9aa6e0';
+      ctx.font = (gold ? '800 16px' : '700 12px') + ' -apple-system,Segoe UI,Roboto,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(title, x + w / 2, y - 8);
+      // box
+      ctx.fillStyle = gold ? '#fff6e4' : 'rgba(255,255,255,.92)';
+      roundRect(ctx, x, y, w, boxH, 8); ctx.fill();
+      ctx.strokeStyle = gold ? '#d99405' : 'rgba(0,0,0,.12)';
+      ctx.lineWidth = gold ? 2 : 1; roundRect(ctx, x, y, w, boxH, 8); ctx.stroke();
+      [0, 1].forEach(i => {
+        const code = resolved(m, i);
+        const opts = { ph: m.slots[i] };
+        if (m.round === 4) opts.champion = champion && code === champion;
+        if (m.round === 5) { opts.bronze = bronze && code === bronze; opts.loser = bronze && code && code !== bronze; }
+        drawSlot(code, x + 2, y + 8 + i * slotH, w - 4, slotH, opts);
+      });
+    }
+    drawCenter(byId['M104'], 'THE FINAL', true);
+    drawCenter(byId['M103'], '3RD PLACE', false);
+
+    /* footer */
+    ctx.fillStyle = '#7e88bf';
+    ctx.font = '600 22px -apple-system,Segoe UI,Roboto,sans-serif';
     ctx.textAlign = 'center';
+    ctx.fillText('Predict yours — share your World Cup 2026 bracket', W / 2, H - 26);
 
-    // ----- bronze -----
-    await teamRow('3rd place', bz, 700, 'rgba(217,168,90,.18)');
-
-    // ----- footer -----
-    ctx.fillStyle = '#8893cc';
-    ctx.font = '600 24px -apple-system,Segoe UI,Roboto,sans-serif';
-    ctx.fillText('Make your own prediction', W / 2, 980);
-
-    // download
+    /* download */
     c.toBlob(b => {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(b);
-      a.download = champion ? `wc2026-${tname(champion).replace(/\s+/g, '-').toLowerCase()}.png` : 'wc2026-bracket.png';
+      const who = playerName ? playerName.replace(/\s+/g, '-').toLowerCase() : 'my';
+      a.download = `wc2026-${who}-bracket.png`;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 1500);
     }, 'image/png');
