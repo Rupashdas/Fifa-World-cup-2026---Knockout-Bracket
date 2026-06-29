@@ -631,18 +631,24 @@ function showNameStep(opts) {
   const btnSpan = btn ? btn.querySelector('span') : null;
   if (opts.mode === 'start') {
     if (t) t.textContent = "আপনার নাম কী?";
-    if (s) s.textContent = "আপনার নাম আপনার ব্র্যাকেটে লিখে দেব, যাতে বন্ধুদের জানতে পারে এটা কার ভবিষ্যদ্বাণী।";
+    if (s) s.textContent = "আপনার নাম আপনার ব্র্যাকেটে লিখে দেব, যাতে আপনার বন্ধুরা জানতে পারে এটা কার ভবিষ্যদ্বাণী।";
     if (btnSpan) btnSpan.textContent = 'আমার ভবিষ্যদ্বাণী শুরু করুন';
   } else {
     if (t) t.textContent = "আপনার নাম কী?";
-    if (s) s.textContent = "এটি আপনার ব্র্যাকেটে দেখানো হবে, যাতে বন্ধুদের জানতে পারে এটা কার ভবিষ্যদ্বাণী।";
+    if (s) s.textContent = "এটি আপনার ব্র্যাকেটে দেখানো হবে, যাতে আপনার বন্ধুরা জানতে পারে এটা কার ভবিষ্যদ্বাণী।";
     if (btnSpan) btnSpan.textContent = 'শেয়ার করতে চালিয়ে যান';
   }
   nameAfter = opts.after || null;
   nameInput.value = playerName || loadName();
   shareModal.classList.add('show');
   shareModal.setAttribute('aria-hidden', 'false');
-  setTimeout(() => { nameInput.focus(); nameInput.select && nameInput.select(); }, 250);
+  setTimeout(() => {
+    nameInput.focus();
+    nameInput.select && nameInput.select();
+    if (nameInput.scrollIntoView) {
+      nameInput.scrollIntoView({ block: 'center', inline: 'nearest' });
+    }
+  }, 250);
 }
 function openShare() {
   // name already known by now → go straight to share options
