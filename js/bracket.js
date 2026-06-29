@@ -73,15 +73,8 @@ function snapshot() {
   MATCHES.forEach(m => { if (m.round > 0 && m.round !== 5) picks[m.id] = state[m.id].slice(); });
   return { v: 2, picks, champion, bronze };
 }
-let savedTimer = null;
-function markSaved(txt) {
-  const n = document.getElementById('savedNote'); if (!n) return;
-  n.textContent = txt || 'সংরক্ষিত ✓';
-  clearTimeout(savedTimer);
-  savedTimer = setTimeout(() => { if (n) n.textContent = ''; }, 1700);
-}
 function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(snapshot())); markSaved(); }
+  try { localStorage.setItem(KEY, JSON.stringify(snapshot())); }
   catch (e) { /* storage unavailable */ }
 }
 function applySnapshot(d) {
@@ -171,20 +164,26 @@ function decodeShare(str) {
 
 function buildShareURL() {
   const base = location.origin + location.pathname;
-  let url = base + '#p=' + encodeShare();
-  if (playerName) url += '&n=' + encodeURIComponent(playerName);
-  return url;
+  const params = new URLSearchParams();
+  params.set('p', encodeShare());
+  if (playerName) params.set('n', playerName);
+  return base + '?' + params.toString();
 }
 
 /* read a shared prediction out of the URL on load */
 function loadFromURL() {
-  const h = location.hash || '';
-  const m = h.match(/[#&]p=([^&]+)/);
-  if (!m) return false;
-  // pull an optional name param
-  const nm = h.match(/[#&]n=([^&]+)/);
-  if (nm) { try { playerName = decodeURIComponent(nm[1]).slice(0, 40); } catch (e) { playerName = ''; } }
-  try { return decodeShare(decodeURIComponent(m[1])); }
+  const searchParams = new URLSearchParams(location.search || '');
+  const m = searchParams.get('p');
+  if (!m) {
+    const h = location.hash || '';
+    const hashMatch = h.match(/[#&]p=([^&]+)/);
+    if (!hashMatch) return false;
+    try { return decodeShare(decodeURIComponent(hashMatch[1])); }
+    catch (e) { return false; }
+  }
+  const nm = searchParams.get('n');
+  if (nm) { try { playerName = decodeURIComponent(nm).slice(0, 40); } catch (e) { playerName = ''; } }
+  try { return decodeShare(decodeURIComponent(m)); }
   catch (e) { return false; }
 }
 
@@ -425,6 +424,9 @@ function updateSummary() {
 const COLORS = ['#ffd86b', '#3c5cff', '#ff5b74', '#46c47e', '#ff9e2c', '#a06bff', '#ffffff'];
 function confettiBurst() {
   const host = document.getElementById('confetti');
+  if (!host) return;
+  // Web Animations API may be missing on very old browsers — skip gracefully.
+  if (typeof Element === 'undefined' || !Element.prototype.animate) return;
   for (let i = 0; i < 140; i++) {
     const c = el('div', 'conf');
     const x = Math.random() * 100;
@@ -551,7 +553,6 @@ function resetAll() {
   MATCHES.forEach(m => { if (m.round > 0 && m.round !== 5) state[m.id] = [null, null]; });
   champion = null; bronze = null; prevChampion = null; revalidate(); render(); save();
   if (history.replaceState) history.replaceState(null, '', location.pathname);
-  markSaved('মুছে ফেলা হলো ✓');
 }
 document.getElementById('simBtn').addEventListener('click', simulate);
 document.getElementById('resetBtn').addEventListener('click', resetAll);
@@ -579,36 +580,12 @@ function shareMessage(url) {
 function whatsappURL() {
   return 'https://wa.me/?text=' + encodeURIComponent(shareMessage(buildShareURL()));
 }
-function facebookShareURL() {
-  return 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(buildShareURL()) +
-    '&quote=' + encodeURIComponent(shareMessage(buildShareURL()));
-}
-async function facebookShare() {
-  const url = buildShareURL();
-  const text = shareMessage(url);
-  shareNote.textContent = 'Facebook এ শেয়ার করার প্রস্তুতি চলছে…';
-
-  try {
-    if (navigator.canShare && navigator.canShare({ files: [new File([new Blob([new ArrayBuffer(1)])], 'share.png', { type: 'image/png' })] })) {
-      const blob = await buildBracketBlob();
-      const file = new File([blob], bracketFilename(), { type: 'image/png' });
-      await navigator.share({ title: 'ফিফা বিশ্বকাপ ২০২৬ ব্র্যাকেট', text, url, files: [file] });
-      shareNote.textContent = 'শেয়ার করার জন্য ফেসবুক শেয়ার শিট খুলেছে।';
-      return;
-    }
-  } catch (err) {
-    console.warn('Facebook native share unsupported or failed', err);
-  }
-
-  window.open(facebookShareURL(), '_blank', 'noopener');
-  shareNote.textContent = 'Facebook শেয়ার উইন্ডো খুলেছে।';
-}
 
 function showShareStep() {
   nameStep.hidden = true; shareStep.hidden = false;
   shareLinkInput.value = buildShareURL();
   shareNote.textContent = '';
-  if (history.replaceState) history.replaceState(null, '', buildShareURL().split(location.pathname)[1] || '');
+  if (history.replaceState) history.replaceState(null, '', buildShareURL());
 }
 
 function requireNameThen(callback) {
@@ -684,8 +661,6 @@ document.getElementById('nameSkip').addEventListener('click', skipName);
 document.getElementById('editName').addEventListener('click', () => showNameStep({ mode: 'share' }));
 nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') commitName(); });
 document.getElementById('shareWhatsApp').addEventListener('click', () => { requireNameThen(() => { window.open(whatsappURL(), '_blank', 'noopener'); }); });
-const fbPageButton = document.getElementById('shareFacebookPage');
-if (fbPageButton) fbPageButton.addEventListener('click', () => { requireNameThen(facebookShare); });
 
 document.getElementById('copyLink').addEventListener('click', async () => {
   const url = shareLinkInput.value;
