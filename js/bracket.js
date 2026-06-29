@@ -579,6 +579,30 @@ function shareMessage(url) {
 function whatsappURL() {
   return 'https://wa.me/?text=' + encodeURIComponent(shareMessage(buildShareURL()));
 }
+function facebookShareURL() {
+  return 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(buildShareURL()) +
+    '&quote=' + encodeURIComponent(shareMessage(buildShareURL()));
+}
+async function facebookShare() {
+  const url = buildShareURL();
+  const text = shareMessage(url);
+  shareNote.textContent = 'Facebook এ শেয়ার করার প্রস্তুতি চলছে…';
+
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [new File([new Blob([new ArrayBuffer(1)])], 'share.png', { type: 'image/png' })] })) {
+      const blob = await buildBracketBlob();
+      const file = new File([blob], bracketFilename(), { type: 'image/png' });
+      await navigator.share({ title: 'ফিফা বিশ্বকাপ ২০২৬ ব্র্যাকেট', text, url, files: [file] });
+      shareNote.textContent = 'শেয়ার করার জন্য ফেসবুক শেয়ার শিট খুলেছে।';
+      return;
+    }
+  } catch (err) {
+    console.warn('Facebook native share unsupported or failed', err);
+  }
+
+  window.open(facebookShareURL(), '_blank', 'noopener');
+  shareNote.textContent = 'Facebook শেয়ার উইন্ডো খুলেছে।';
+}
 
 function showShareStep() {
   nameStep.hidden = true; shareStep.hidden = false;
@@ -649,6 +673,8 @@ document.getElementById('nameSkip').addEventListener('click', skipName);
 document.getElementById('editName').addEventListener('click', () => showNameStep({ mode: 'share' }));
 nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') commitName(); });
 document.getElementById('shareWhatsApp').addEventListener('click', () => { window.open(whatsappURL(), '_blank', 'noopener'); });
+const fbPageButton = document.getElementById('shareFacebookPage');
+if (fbPageButton) fbPageButton.addEventListener('click', facebookShare);
 
 document.getElementById('copyLink').addEventListener('click', async () => {
   const url = shareLinkInput.value;

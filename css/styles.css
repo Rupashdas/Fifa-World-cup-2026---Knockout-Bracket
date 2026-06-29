@@ -6,6 +6,7 @@
   --accent:#2f4dff; --accent-soft:rgba(47,77,255,.12);
   --champ1:#ffe08a; --champ2:#ff9e2c;
   --wa:#25d366; --wa-dk:#1ebe5a;
+  --fb:#1877f2; --fb-dk:#165ec5;
   --safe-b:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -151,6 +152,12 @@ body{
 .ab-btn:active{transform:scale(.95);}
 .ab-ico{font-size:16px;line-height:1;}
 .ab-png{color:var(--accent);border-color:#c3ccf5;background:#eef2ff;}
+.ab-fb{flex:1 1 auto;flex-direction:row;padding:12px 10px;font-size:13.5px;
+  background:var(--fb);border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(24,119,242,.38);
+}
+.ab-fb:active{background:var(--fb-dk);}
+.ab-fb .wa-ico{width:18px;height:18px;}
+.ab-fb span{white-space:nowrap;}
 /* WhatsApp share: wraps onto its own full-width row on mobile */
 .ab-share{
   flex:1 1 100%;flex-direction:row;padding:12px 8px;font-size:13.5px;
