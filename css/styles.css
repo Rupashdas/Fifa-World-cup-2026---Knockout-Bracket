@@ -6,7 +6,6 @@
   --accent:#2f4dff; --accent-soft:rgba(47,77,255,.12);
   --champ1:#ffe08a; --champ2:#ff9e2c;
   --wa:#25d366; --wa-dk:#1ebe5a;
-  --fb:#1877f2; --fb-dk:#0f5fd0;
   --safe-b:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -144,15 +143,14 @@ body{
 .ab-btn:active{transform:scale(.95);}
 .ab-ico{font-size:16px;line-height:1;}
 .ab-png{color:var(--accent);border-color:#c3ccf5;background:#eef2ff;}
-/* row 2: the two share actions, side by side full width */
-.ab-fb,.ab-share{flex:1 1 calc(50% - 4px);flex-direction:row;padding:11px 8px;font-size:13px;}
-.ab-fb{color:#fff;background:var(--fb);border-color:transparent;box-shadow:0 4px 14px rgba(24,119,242,.35);}
-.ab-fb:active{background:var(--fb-dk);}
-.ab-fb .fb-ico{width:19px;height:19px;}
-.ab-share{background:var(--wa);border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(37,211,102,.4);}
+/* WhatsApp share: wraps onto its own full-width row on mobile */
+.ab-share{
+  flex:1 1 100%;flex-direction:row;padding:12px 8px;font-size:13.5px;
+  background:var(--wa);border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(37,211,102,.4);
+}
 .ab-share:active{background:var(--wa-dk);}
 .ab-share .wa-ico{width:20px;height:20px;}
-.ab-fb span,.ab-share span{white-space:nowrap;}
+.ab-share span{white-space:nowrap;}
 
 /* ---------- bottom-sheet share dialog ---------- */
 .sheet-overlay{position:fixed;inset:0;z-index:70;display:none;align-items:flex-end;justify-content:center;background:rgba(20,28,55,.45);backdrop-filter:blur(2px);}
@@ -180,13 +178,6 @@ body{
 .wa-big .wa-ico{width:24px;height:24px;}
 .wa-big.plain{background:var(--accent);box-shadow:0 6px 20px rgba(47,77,255,.35);}
 .wa-big.plain:active{background:#243dcc;}
-.wa-big.fb-blue{background:var(--fb);box-shadow:0 6px 20px rgba(24,119,242,.35);}
-.wa-big.fb-blue:active{background:var(--fb-dk);}
-.wa-big .fb-ico{width:24px;height:24px;}
-.fb-steps{margin:0 0 18px;padding-left:22px;}
-.fb-steps li{font-size:14px;color:#3a4566;line-height:1.6;margin-bottom:8px;}
-.fb-steps b{color:var(--text);}
-.fb-tip{margin:14px 0 0;font-size:12.5px;color:var(--muted);text-align:center;line-height:1.5;}
 .wa-ico{display:inline-block;}
 
 .copy-row{display:flex;gap:8px;}
@@ -243,7 +234,7 @@ body{
     border-radius:16px;box-shadow:0 12px 36px rgba(28,42,90,.18);
   }
   .ab-btn{flex:0 0 auto;flex-direction:row;padding:11px 18px;font-size:13.5px;border-radius:11px;}
-  .ab-fb,.ab-share{flex:0 0 auto;padding:11px 20px;}
+  .ab-share{flex:0 0 auto;padding:11px 22px;}
   .sheet-overlay{align-items:center;}
   .sheet{border-radius:18px;max-width:440px;animation:sheetPop .25s cubic-bezier(.34,1.4,.64,1);padding-bottom:24px;}
   @keyframes sheetPop{from{transform:scale(.92);opacity:0;}to{transform:scale(1);opacity:1;}}

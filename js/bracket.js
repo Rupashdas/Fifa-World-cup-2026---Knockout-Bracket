@@ -726,7 +726,7 @@ function roundRect(ctx,x,y,w,h,r){
   ctx.closePath();
 }
 
-/* Builds the full-bracket PNG and returns a Blob (shared by Save + Facebook). */
+/* Builds the full-bracket PNG and returns a Blob. */
 function buildBracketBlob(){
   return new Promise(async (resolve,reject)=>{
    try{
@@ -852,12 +852,12 @@ function buildBracketBlob(){
         ctx.drawImage(flags[code],fx,fy,fw,fh); ctx.restore();
         ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=.5; ctx.strokeRect(fx,fy,fw,fh);
       }
-      // name
+      // name — use the short code (e.g. GER, BRA) so it fits inside the box
       ctx.textAlign='left';
       ctx.fillStyle = opts.loser ? '#9aa1b5' : (opts.champion||opts.bronze?'#3a2400':'#1c2336');
-      ctx.font=(opts.winner||opts.champion?'800':'600')+' 14px -apple-system,Segoe UI,Roboto,sans-serif';
-      const nm = code ? tname(code) : (opts.ph||'');
-      if(!code){ ctx.fillStyle='#aab1c4'; ctx.font='500 12px sans-serif'; }
+      ctx.font=(opts.winner||opts.champion?'800':'700')+' 15px -apple-system,Segoe UI,Roboto,sans-serif';
+      const nm = code ? code : (opts.ph||'');
+      if(!code){ ctx.fillStyle='#aab1c4'; ctx.font='500 11px sans-serif'; }
       ctx.fillText(nm, x+38, y+h/2+5);
       // medal/trophy
       if(opts.champion && trophyImg) ctx.drawImage(trophyImg, x+w-22, y+(h-18)/2, 18, 18);
@@ -952,79 +952,6 @@ async function exportPNG(){
   }
 }
 document.getElementById('pngBtn').addEventListener('click',exportPNG);
-
-/* ============================================================
-   POST ON FACEBOOK
-   A static site can't push an image straight into a Facebook
-   post (that needs a Facebook App + backend). So we do the
-   reliable thing: save the picture to the device, open the
-   Facebook composer, and tell the user to attach the saved image.
-   On phones that support it, we use the native share sheet first
-   (which can hand the actual image file to the Facebook app).
-   ============================================================ */
-async function postToFacebook(){
-  const btn=document.getElementById('fbBtn');
-  const label=btn?btn.querySelector('span:last-child'):null;
-  const old=label?label.textContent:'';
-  if(label) label.textContent='Preparing…';
-  if(btn) btn.style.pointerEvents='none';
-  try{
-    const blob=await buildBracketBlob();
-    const filename=bracketFilename();
-    const shareUrl=buildShareURL();
-    const caption=(playerName?`${playerName}'s `:'My ')+
-      `FIFA World Cup 2026 bracket`+(champion?` — champion: ${tname(champion)} 🏆`:'')+
-      `\nMake your own: ${shareUrl}`;
-
-    // 1) Best case (mostly mobile): native share sheet WITH the image file.
-    const file=new File([blob], filename, {type:'image/png'});
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      try{
-        await navigator.share({ files:[file], text:caption });
-        closeFb && closeFb();
-        return; // user shared (could pick Facebook) — done
-      }catch(e){
-        if(e && e.name==='AbortError'){ if(label) label.textContent=old; if(btn) btn.style.pointerEvents=''; return; }
-        // otherwise fall through to the save+open flow
-      }
-    }
-
-    // 2) Fallback (desktop + browsers without file share):
-    //    save the image, then open the Facebook composer.
-    downloadBlob(blob, filename);
-    openFbHelp(shareUrl);
-  }catch(err){
-    console.error(err);
-    alert('Sorry — could not create the image. Please try again.');
-  }finally{
-    if(label) label.textContent=old; if(btn) btn.style.pointerEvents='';
-  }
-}
-
-/* Facebook help dialog: explains the two simple steps and opens FB. */
-function openFbHelp(shareUrl){
-  const ov=document.getElementById('fbModal');
-  if(!ov){
-    // no modal in DOM? just open Facebook directly.
-    window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(shareUrl),'_blank','noopener');
-    return;
-  }
-  ov.classList.add('show'); ov.setAttribute('aria-hidden','false');
-  const go=document.getElementById('fbOpen');
-  go.onclick=()=>{
-    window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(shareUrl),'_blank','noopener');
-  };
-}
-function closeFb(){
-  const ov=document.getElementById('fbModal');
-  if(ov){ ov.classList.remove('show'); ov.setAttribute('aria-hidden','true'); }
-}
-(function(){
-  const b=document.getElementById('fbBtn'); if(b) b.addEventListener('click',postToFacebook);
-  const c=document.getElementById('fbClose'); if(c) c.addEventListener('click',closeFb);
-  const ov=document.getElementById('fbModal');
-  if(ov) ov.addEventListener('click',e=>{ if(e.target===ov) closeFb(); });
-})();
 
 /* ---------------- init ---------------- */
 buildConnectors();
