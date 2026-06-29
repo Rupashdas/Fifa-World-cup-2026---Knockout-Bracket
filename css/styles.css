@@ -183,6 +183,33 @@ body{
 .copy-btn:active{background:#eef2ff;}
 .share-note{margin-top:12px;font-size:13px;color:var(--wa-dk);font-weight:700;min-height:18px;text-align:center;}
 
+/* name step */
+.name-input{
+  width:100%;border:1.5px solid #d3d9e8;border-radius:13px;padding:15px 16px;
+  font-size:17px;color:var(--text);background:#f7f9fd;margin-bottom:14px;font-weight:600;
+}
+.name-input:focus{outline:none;border-color:var(--accent);background:#fff;}
+.skip-link{
+  display:block;width:100%;margin-top:14px;border:none;background:none;
+  color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;padding:6px;
+}
+.skip-link:active{color:var(--text);}
+
+/* "X's prediction" banner */
+.predby{
+  display:flex;align-items:center;gap:9px;margin:0 0 14px;
+  background:linear-gradient(92deg,#eef2ff,#f6f0ff);
+  border:1px solid #d8def5;border-radius:13px;padding:11px 14px;
+  font-size:14.5px;color:#3a4566;
+}
+.predby-ico{font-size:18px;}
+.predby b{color:var(--accent);font-weight:800;}
+.predby-mine{
+  margin-left:auto;border:1px solid var(--accent);background:#fff;color:var(--accent);
+  border-radius:99px;padding:7px 14px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;
+}
+.predby-mine:active{background:var(--accent);color:#fff;}
+
 /* ---------- toast ---------- */
 .toast{position:fixed;left:50%;bottom:calc(96px + var(--safe-b));transform:translateX(-50%) translateY(20px);background:linear-gradient(92deg,var(--gold-bd),var(--gold));color:#3a2400;font-weight:800;font-size:14.5px;padding:13px 22px;border-radius:99px;box-shadow:0 10px 34px rgba(217,148,5,.4);z-index:60;opacity:0;transition:opacity .3s,transform .3s;display:flex;align-items:center;gap:9px;max-width:90vw;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}

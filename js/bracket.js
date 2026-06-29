@@ -10,6 +10,8 @@ let champion = null;
 let bronze = null;
 let dragTeam = null;
 let prevChampion = null;
+let playerName = '';      // who made this prediction (shown when viewing a shared link)
+let viewingShared = false;// true when the page was opened from a shared #p= link
 
 const resolved = (m, i) => m.round === 0 ? m.slots[i] : (state[m.id][i] || null);
 const winnerOf = id => { const d = downstream[id]; return d ? (state[d.mid][d.sidx] || null) : null; };
@@ -169,7 +171,9 @@ function decodeShare(str) {
 
 function buildShareURL() {
   const base = location.origin + location.pathname;
-  return base + '#p=' + encodeShare();
+  let url = base + '#p=' + encodeShare();
+  if (playerName) url += '&n=' + encodeURIComponent(playerName);
+  return url;
 }
 
 /* read a shared prediction out of the URL on load */
@@ -177,6 +181,9 @@ function loadFromURL() {
   const h = location.hash || '';
   const m = h.match(/[#&]p=([^&]+)/);
   if (!m) return false;
+  // pull an optional name param
+  const nm = h.match(/[#&]n=([^&]+)/);
+  if (nm) { try { playerName = decodeURIComponent(nm[1]).slice(0, 40); } catch (e) { playerName = ''; } }
   try { return decodeShare(decodeURIComponent(m[1])); }
   catch (e) { return false; }
 }
@@ -225,14 +232,35 @@ function buildConnectors() {
   line(sfLcx, midY, sfLcx, sfTop, 'M101');
   line(sfRcx, midY, sfRcx, sfTop, 'M102');
 
-  const html = seg.map(s => `<line data-key="${s.key}" x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}"/>`).join('');
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(SVGNS, 'svg');
   svg.setAttribute('class', 'connectors');
   svg.setAttribute('width', '1130'); svg.setAttribute('height', '800');
-  svg.innerHTML = `<defs><linearGradient id="litgrad" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#3c5cff"/><stop offset="1" stop-color="#ffb627"/>
-    </linearGradient></defs>`+ html;
-  bracket.appendChild(svg);
+  svg.setAttribute('viewBox', '0 0 1130 800');
+
+  // gradient def (namespaced)
+  const defs = document.createElementNS(SVGNS, 'defs');
+  const grad = document.createElementNS(SVGNS, 'linearGradient');
+  grad.setAttribute('id', 'litgrad');
+  grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0');
+  grad.setAttribute('x2', '1'); grad.setAttribute('y2', '0');
+  [['0', '#3c5cff'], ['1', '#ffb627']].forEach(([off, col]) => {
+    const st = document.createElementNS(SVGNS, 'stop');
+    st.setAttribute('offset', off); st.setAttribute('stop-color', col);
+    grad.appendChild(st);
+  });
+  defs.appendChild(grad); svg.appendChild(defs);
+
+  // each connector line (namespaced)
+  seg.forEach(s => {
+    const ln = document.createElementNS(SVGNS, 'line');
+    ln.setAttribute('data-key', s.key);
+    ln.setAttribute('x1', s.x1); ln.setAttribute('y1', s.y1);
+    ln.setAttribute('x2', s.x2); ln.setAttribute('y2', s.y2);
+    svg.appendChild(ln);
+  });
+
+  bracket.insertBefore(svg, bracket.firstChild);
   svgEl = svg;
 }
 function litConnectors() {
@@ -450,13 +478,23 @@ function onDrop(e) {
   if (m.round === 0 || m.round === 5) return;
   e.preventDefault();
   const team = dragTeam || e.dataTransfer.getData('text/plain');
-  if (validFor(m, +i).includes(team)) { state[mid][+i] = team; revalidate(); render(); maybeCelebrate(); save(); }
+  if (validFor(m, +i).includes(team)) { takeOverIfShared(); state[mid][+i] = team; revalidate(); render(); maybeCelebrate(); save(); }
 }
 function clearHi() { document.querySelectorAll('.drop-ok').forEach(x => x.classList.remove('drop-ok')); }
+
+/* The moment a viewer edits someone else's shared bracket, it becomes their own. */
+function takeOverIfShared() {
+  if (viewingShared) {
+    viewingShared = false; playerName = '';
+    renderPredBy();
+    if (history.replaceState) history.replaceState(null, '', location.pathname);
+  }
+}
 
 bracket.addEventListener('click', e => {
   const clr = e.target.closest('.clr');
   if (clr) {
+    takeOverIfShared();
     const m = byId[clr.dataset.mid];
     if (m.round === 5) { bronze = null; render(); save(); return; }
     state[clr.dataset.mid][+clr.dataset.i] = null; revalidate(); render(); save(); return;
@@ -464,6 +502,7 @@ bracket.addEventListener('click', e => {
   const s = e.target.closest('.slot'); if (!s) return;
   const [, mid, i] = s.id.split('-'); const m = byId[mid];
   const team = resolved(m, +i); if (!team) return;
+  takeOverIfShared();
   if (m.round <= 3) {
     const d = downstream[mid]; if (!d) return;
     state[d.mid][d.sidx] = (state[d.mid][d.sidx] === team) ? null : team;
@@ -477,6 +516,7 @@ bracket.addEventListener('click', e => {
 
 /* auto-fill + reset */
 function simulate() {
+  takeOverIfShared();
   MATCHES.forEach(m => { if (m.round > 0 && m.round !== 5) state[m.id] = [null, null]; });
   champion = null; bronze = null; prevChampion = null;
   [0, 1, 2, 3].forEach(r => {
@@ -496,6 +536,7 @@ function simulate() {
   render(); maybeCelebrate(); save();
 }
 function resetAll() {
+  takeOverIfShared();
   MATCHES.forEach(m => { if (m.round > 0 && m.round !== 5) state[m.id] = [null, null]; });
   champion = null; bronze = null; prevChampion = null; revalidate(); render(); save();
   if (history.replaceState) history.replaceState(null, '', location.pathname);
@@ -511,39 +552,61 @@ document.getElementById('resetBtn').addEventListener('click', resetAll);
 const shareModal = document.getElementById('shareModal');
 const shareLinkInput = document.getElementById('shareLink');
 const shareNote = document.getElementById('shareNote');
+const nameStep = document.getElementById('nameStep');
+const shareStep = document.getElementById('shareStep');
+const nameInput = document.getElementById('nameInput');
+
+const NAME_KEY = 'wc2026_name';
+function loadName() { try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; } }
+function persistName() { try { localStorage.setItem(NAME_KEY, playerName); } catch (e) { } }
 
 function shareMessage(url) {
-  if (champion) return `My FIFA World Cup 2026 winner: ${tname(champion)} 🏆\nSee my full bracket & make your own:\n${url}`;
-  return `Check out my FIFA World Cup 2026 bracket — make your own:\n${url}`;
+  const who = playerName ? `${playerName}'s ` : 'my ';
+  if (champion) return `${playerName ? playerName + "'s" : 'My'} FIFA World Cup 2026 winner: ${tname(champion)} 🏆\nSee ${who}full bracket & make your own:\n${url}`;
+  return `Check out ${who}FIFA World Cup 2026 bracket — make your own:\n${url}`;
 }
 function whatsappURL() {
-  const url = buildShareURL();
-  return 'https://wa.me/?text=' + encodeURIComponent(shareMessage(url));
+  return 'https://wa.me/?text=' + encodeURIComponent(shareMessage(buildShareURL()));
+}
+
+function showShareStep() {
+  nameStep.hidden = true; shareStep.hidden = false;
+  shareLinkInput.value = buildShareURL();
+  shareNote.textContent = '';
+  if (history.replaceState) history.replaceState(null, '', buildShareURL().split(location.pathname)[1] || '');
+}
+function showNameStep() {
+  shareStep.hidden = true; nameStep.hidden = false;
+  nameInput.value = playerName || loadName();
+  setTimeout(() => nameInput.focus(), 250);
 }
 function openShare() {
-  const url = buildShareURL();
-  shareLinkInput.value = url;
-  shareNote.textContent = '';
-  // keep the address bar in sync so a refresh preserves the bracket
-  if (history.replaceState) history.replaceState(null, '', '#p=' + encodeShare());
   shareModal.classList.add('show');
   shareModal.setAttribute('aria-hidden', 'false');
+  // if we already know the name (saved or from a viewed link), skip straight to share
+  if (playerName || loadName()) { playerName = playerName || loadName(); showShareStep(); }
+  else showNameStep();
 }
 function closeShare() {
   shareModal.classList.remove('show');
   shareModal.setAttribute('aria-hidden', 'true');
 }
-function goWhatsApp() {
-  // try the native share sheet first on mobile (lets user pick WhatsApp),
-  // then fall back to the wa.me deep link.
-  const url = buildShareURL();
-  window.open(whatsappURL(), '_blank', 'noopener');
+function commitName() {
+  const v = (nameInput.value || '').trim().slice(0, 40);
+  playerName = v;
+  if (v) persistName();
+  renderPredBy();
+  showShareStep();
 }
 
 document.getElementById('shareBtn').addEventListener('click', openShare);
 document.getElementById('shareClose').addEventListener('click', closeShare);
 shareModal.addEventListener('click', e => { if (e.target === shareModal) closeShare(); });
-document.getElementById('shareWhatsApp').addEventListener('click', goWhatsApp);
+document.getElementById('nameNext').addEventListener('click', commitName);
+document.getElementById('nameSkip').addEventListener('click', () => { playerName = ''; renderPredBy(); showShareStep(); });
+document.getElementById('editName').addEventListener('click', showNameStep);
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') commitName(); });
+document.getElementById('shareWhatsApp').addEventListener('click', () => { window.open(whatsappURL(), '_blank', 'noopener'); });
 
 document.getElementById('copyLink').addEventListener('click', async () => {
   const url = shareLinkInput.value;
@@ -555,6 +618,28 @@ document.getElementById('copyLink').addEventListener('click', async () => {
     try { document.execCommand('copy'); shareNote.textContent = 'Link copied ✓'; }
     catch (_) { shareNote.textContent = 'Press and hold the link to copy.'; }
   }
+});
+
+/* "X's prediction" banner shown when viewing a named, shared bracket */
+function renderPredBy() {
+  const bar = document.getElementById('predBy');
+  if (!bar) return;
+  if (viewingShared && playerName) {
+    document.getElementById('predByName').textContent = playerName;
+    bar.hidden = false;
+  } else {
+    bar.hidden = true;
+  }
+}
+document.getElementById('makeOwn').addEventListener('click', () => {
+  // clear the "viewing someone else's" state and start fresh
+  viewingShared = false; playerName = '';
+  MATCHES.forEach(m => { if (m.round > 0 && m.round !== 5) state[m.id] = [null, null]; });
+  champion = null; bronze = null; prevChampion = null;
+  revalidate();
+  if (history.replaceState) history.replaceState(null, '', location.pathname);
+  renderPredBy(); render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 /* ============================================================
@@ -606,7 +691,7 @@ async function exportPNG() {
     ctx.fillText('FIFA WORLD CUP 2026', W / 2, 92);
     ctx.fillStyle = '#ffffff';
     ctx.font = '800 58px -apple-system,Segoe UI,Roboto,sans-serif';
-    ctx.fillText('My Bracket Prediction', W / 2, 158);
+    ctx.fillText(playerName ? `${playerName}'s Bracket` : 'My Bracket Prediction', W / 2, 158);
 
     const drawFlag = async (code, cx, cy, fw) => {
       const fh = fw * 0.7;
@@ -723,8 +808,12 @@ buildCards();
 })();
 
 /* priority: a shared link in the URL wins over local storage */
-if (!loadFromURL()) {
+if (loadFromURL()) {
+  viewingShared = true;          // opened from someone's shared link
+} else {
   loadStored();
+  playerName = loadName();       // returning user's own saved name
 }
+renderPredBy();
 prevChampion = champion;
 render();
