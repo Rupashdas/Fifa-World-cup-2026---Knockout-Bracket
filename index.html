@@ -2,64 +2,69 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Knockout bracket — FIFA World Cup 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#2f4dff">
+<title>My World Cup 2026 Bracket</title>
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <div class="page">
   <div class="topbar">
-    <div>
+    <div class="topbar-text">
       <h1 class="title">Road to the Final</h1>
-      <p class="subtitle">FIFA World Cup 26™ knockout predictor. Click a team to send it through, or drag it onto its slot. Crown your champion and watch the trophy come to life.</p>
+      <p class="subtitle">FIFA World Cup 26™ predictor — tap a team to send it to the next round.</p>
     </div>
     <div class="progress-wrap">
-      <div class="progress-label"><span>Bracket completed</span><span id="progPct">0%</span></div>
+      <div class="progress-label"><span>Your bracket</span><span id="progPct">0%</span></div>
       <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
     </div>
   </div>
 
-  <div class="scroller">
+  <div class="scroller" id="scroller">
     <div class="bracket" id="bracket"></div>
   </div>
+  <p class="scroll-hint" id="scrollHint">&#8592; swipe to see the whole bracket &#8594;</p>
 
-  <div class="footer">
-    <h3>How to predict</h3>
-    <p>
-      Every Round of 32 match is already filled. Advance teams two ways:
-      <b>click</b> a team to push it forward, or <b>drag</b> it onto its <b>W…</b> placeholder in the next round.
-      The <b>third-place play-off fills itself</b> the moment both semi-final winners are chosen — the two losers drop straight in, and you can <b>click one to award the bronze</b> 🥉.
-      In the Final, click a finalist to <b>crown your champion</b> 🏆. The × clears a pick.
-      Picks <b>auto-save in this browser</b>; <b>Export JSON</b> backs them up to a <code>bracket-data.json</code> file you can reload anytime.
-    </p>
-    <div class="btns">
-      <button class="btn gold" id="simBtn">🎲 Auto-fill (random)</button>
-      <button class="btn" id="resetBtn">↺ Reset</button>
-      <button class="btn primary" id="shareBtn">🔗 Share prediction</button>
-      <button class="btn" id="pngBtn">🖼 Export PNG</button>
-      <button class="btn" id="exportBtn">⬇ Export JSON</button>
-      <button class="btn" id="importBtn">⬆ Import JSON</button>
-      <input type="file" id="importFile" accept="application/json,.json" hidden>
-      <span class="saved" id="savedNote"></span>
-    </div>
+  <div class="summary-card" id="summaryCard">
     <div class="summary" id="summary"></div>
+  </div>
+
+  <div class="howto">
+    <h3>How it works</h3>
+    <ol class="howto-list">
+      <li><b>Tap a team</b> to send it through to the next round.</li>
+      <li>Keep going until the <b>Final</b> — tap a finalist to <b>crown your champion</b> &#127942;.</li>
+      <li>The <b>3rd-place match</b> fills in by itself. Tap a team there for the <b>bronze</b> &#129353;.</li>
+      <li>Tap the <b>&times;</b> on any team to undo a pick. Your bracket saves automatically.</li>
+    </ol>
   </div>
 </div>
 
-<!-- Share dialog -->
-<div class="modal-overlay" id="shareModal" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
-    <button class="modal-close" id="shareClose" title="Close">×</button>
-    <h3 id="shareTitle">🔗 Share your prediction</h3>
-    <p class="modal-sub">Anyone with this link sees your exact bracket — picks, champion and bronze. The whole prediction travels inside the link, so it works without any account.</p>
-    <div class="share-row">
+<div class="actionbar">
+  <button class="ab-btn" id="simBtn"><span class="ab-ico">&#127922;</span><span>Auto-fill</span></button>
+  <button class="ab-btn" id="resetBtn"><span class="ab-ico">&#8634;</span><span>Reset</span></button>
+  <button class="ab-btn ab-png" id="pngBtn"><span class="ab-ico">&#128247;</span><span>Save image</span></button>
+  <button class="ab-btn ab-share" id="shareBtn">
+    <svg class="wa-ico" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.7 1.9 6.7L3 29l7-1.8c1.9 1 4 1.6 6 1.6 7 0 12.5-5.5 12.5-12.5S23 3 16 3zm0 22.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-4.2 1.1 1.1-4-.3-.4a10.2 10.2 0 0 1-1.6-5.5c0-5.7 4.6-10.3 10.3-10.3S26.3 9.8 26.3 15.5 21.7 25.8 16 25.8zm5.7-7.7c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.6s-.7-1.7-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.4 3.7 5.9 5.2 2.2.9 3 1 4.1.9.7-.1 1.8-.7 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4z"/></svg>
+    <span>Share</span>
+  </button>
+</div>
+
+<div class="sheet-overlay" id="shareModal" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+    <div class="sheet-grip"></div>
+    <button class="sheet-close" id="shareClose" aria-label="Close">&times;</button>
+    <h3 id="shareTitle">Share your bracket</h3>
+    <p class="sheet-sub" id="shareSub">Send your prediction to friends. The whole bracket is inside the link &mdash; no app or sign-up needed to view it.</p>
+
+    <button class="wa-big" id="shareWhatsApp">
+      <svg class="wa-ico" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3C9 3 3.5 8.5 3.5 15.5c0 2.4.7 4.7 1.9 6.7L3 29l7-1.8c1.9 1 4 1.6 6 1.6 7 0 12.5-5.5 12.5-12.5S23 3 16 3zm0 22.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-4.2 1.1 1.1-4-.3-.4a10.2 10.2 0 0 1-1.6-5.5c0-5.7 4.6-10.3 10.3-10.3S26.3 9.8 26.3 15.5 21.7 25.8 16 25.8zm5.7-7.7c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.6s-.7-1.7-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.4 3.7 5.9 5.2 2.2.9 3 1 4.1.9.7-.1 1.8-.7 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4z"/></svg>
+      Share on WhatsApp
+    </button>
+
+    <div class="copy-row">
       <input type="text" id="shareLink" readonly>
-      <button class="btn primary" id="copyLink">Copy</button>
-    </div>
-    <div class="share-actions">
-      <a class="btn" id="shareTwitter" target="_blank" rel="noopener">𝕏 Post</a>
-      <a class="btn" id="shareWhatsApp" target="_blank" rel="noopener">WhatsApp</a>
-      <button class="btn" id="shareNative">More…</button>
+      <button class="copy-btn" id="copyLink">Copy link</button>
     </div>
     <div class="share-note" id="shareNote"></div>
   </div>
